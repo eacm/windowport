@@ -253,7 +253,9 @@ struct SessionView: View {
     }
 
     private func event(_ kind: PointerEventKind, at point: CGPoint, in size: CGSize) -> PointerEvent {
-        let bounded = clamped(point, to: size)
+        // The streamed Windows input surface lands one rendered cursor-height
+        // below the local overlay. Shift the remote hotspot to the visible tip.
+        let bounded = clamped(CGPoint(x: point.x, y: point.y - 22), to: size)
         return PointerEvent(kind: kind, x: bounded.x / size.width, y: bounded.y / size.height, deltaY: nil)
     }
 
