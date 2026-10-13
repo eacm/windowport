@@ -4,6 +4,12 @@ import WebKit
 struct MJPEGStreamView: UIViewRepresentable {
     let url: URL
 
+    final class Coordinator {
+        var loadedURL: URL?
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
     func makeUIView(context: Context) -> WKWebView {
         let configuration = WKWebViewConfiguration()
         configuration.defaultWebpagePreferences.allowsContentJavaScript = false
@@ -16,7 +22,8 @@ struct MJPEGStreamView: UIViewRepresentable {
     }
 
     func updateUIView(_ view: WKWebView, context: Context) {
-        guard view.url != url else { return }
+        guard context.coordinator.loadedURL != url else { return }
+        context.coordinator.loadedURL = url
         let escaped = url.absoluteString
             .replacingOccurrences(of: "&", with: "&amp;")
             .replacingOccurrences(of: "\"", with: "&quot;")
