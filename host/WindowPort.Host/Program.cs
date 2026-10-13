@@ -1,5 +1,6 @@
 using WindowPort.Host.Contracts;
 using WindowPort.Host.Services;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<AppCatalog>();
@@ -7,6 +8,20 @@ builder.Services.AddSingleton<SessionManager>();
 builder.Services.AddSingleton<WindowCapture>();
 builder.Services.AddSingleton<InputService>();
 var app = builder.Build();
+
+// The MVP has no device authentication yet. Fail closed outside loopback and
+// RFC1918/private address space so it cannot be exposed directly to the web.
+app.Use(async (context, next) =>
+{
+    var address = context.Connection.RemoteIpAddress;
+    if (address is not null && !IsPrivate(address))
+    {
+        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+        await context.Response.WriteAsJsonAsync(new { error = "Port accepts private-network clients only." });
+        return;
+    }
+    await next();
+});
 
 app.MapGet("/api/health", () => Results.Ok(new { status = "ready", host = Environment.MachineName }));
 
@@ -53,4 +68,16 @@ app.MapPost("/api/sessions/{id:guid}/text", (Guid id, TextEvent input, SessionMa
 });
 
 app.Run();
+
+static bool IsPrivate(IPAddress address)
+{
+    if (IPAddress.IsLoopback(address)) return true;
+    if (address.IsIPv4MappedToIPv6) address = address.MapToIPv4();
+    var bytes = address.GetAddressBytes();
+    if (bytes.Length == 16) return address.IsIPv6LinkLocal || address.IsIPv6UniqueLocal;
+    return bytes[0] == 10
+        || (bytes[0] == 172 && bytes[1] is >= 16 and <= 31)
+        || (bytes[0] == 192 && bytes[1] == 168)
+        || (bytes[0] == 100 && bytes[1] is >= 64 and <= 127);
+}
 

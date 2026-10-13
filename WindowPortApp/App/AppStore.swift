@@ -19,9 +19,11 @@ final class AppStore {
         self.client = client
         self.defaults = defaults
         let savedHosts = defaults.data(forKey: "hosts").flatMap { try? JSONDecoder().decode([WindowsHost].self, from: $0) } ?? []
-        let allHosts = [.demo] + savedHosts.filter { !$0.isDemo }
+        let bundledHosts: [WindowsHost] = [.workstation, .demo]
+        let bundledIDs = Set(bundledHosts.map(\.id))
+        let allHosts = bundledHosts + savedHosts.filter { !bundledIDs.contains($0.id) }
         hosts = allHosts
-        selectedHost = allHosts[0]
+        selectedHost = .workstation
         favoriteIDs = Set(defaults.stringArray(forKey: "favorites") ?? [])
     }
 

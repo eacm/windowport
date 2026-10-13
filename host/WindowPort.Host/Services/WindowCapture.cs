@@ -14,7 +14,19 @@ public sealed class WindowCapture
         var width = Math.Max(1, rect.Right - rect.Left);
         var height = Math.Max(1, rect.Bottom - rect.Top);
         using var bitmap = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-        using (var graphics = Graphics.FromImage(bitmap)) graphics.CopyFromScreen(rect.Left, rect.Top, 0, 0, new Size(width, height));
+        using (var graphics = Graphics.FromImage(bitmap))
+        {
+            var deviceContext = graphics.GetHdc();
+            var printed = false;
+            try { printed = PrintWindow(handle, deviceContext, 2); }
+            finally { graphics.ReleaseHdc(deviceContext); }
+
+            if (!printed)
+            {
+                try { graphics.CopyFromScreen(rect.Left, rect.Top, 0, 0, new Size(width, height)); }
+                catch (System.ComponentModel.Win32Exception) { return Placeholder(session.Application.Name); }
+            }
+        }
         using var stream = new MemoryStream();
         bitmap.Save(stream, ImageFormat.Jpeg);
         return stream.ToArray();
@@ -34,6 +46,8 @@ public sealed class WindowCapture
 
     [DllImport("user32.dll")]
     private static extern bool GetWindowRect(IntPtr handle, out Rect rect);
+    [DllImport("user32.dll")]
+    private static extern bool PrintWindow(IntPtr handle, IntPtr deviceContext, uint flags);
     private struct Rect { public int Left, Top, Right, Bottom; }
 }
 

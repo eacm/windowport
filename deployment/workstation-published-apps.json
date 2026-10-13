@@ -1,0 +1,37 @@
+[
+  {
+    "id": "brave",
+    "name": "Brave",
+    "executable": "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
+    "arguments": null,
+    "category": "Browser"
+  },
+  {
+    "id": "steam",
+    "name": "Steam",
+    "executable": "C:\\Program Files (x86)\\Steam\\Steam.exe",
+    "arguments": null,
+    "category": "Games"
+  },
+  {
+    "id": "discord",
+    "name": "Discord",
+    "executable": "C:\\Users\\ryanm\\AppData\\Local\\Discord\\Discord.exe",
+    "arguments": null,
+    "category": "Communication"
+  },
+  {
+    "id": "nvidia-app",
+    "name": "NVIDIA App",
+    "executable": "C:\\Program Files\\NVIDIA Corporation\\NVIDIA App\\CEF\\NVIDIA App.exe",
+    "arguments": null,
+    "category": "Utilities"
+  },
+  {
+    "id": "nzxt-cam",
+    "name": "NZXT CAM",
+    "executable": "C:\\Program Files\\NZXT CAM\\NZXT CAM.exe",
+    "arguments": null,
+    "category": "Utilities"
+  }
+]

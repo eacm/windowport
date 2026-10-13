@@ -12,6 +12,12 @@ struct WindowsHost: Identifiable, Codable, Hashable {
         baseURL: URL(string: "demo://windowport")!,
         isDemo: true
     )
+
+    static let workstation = WindowsHost(
+        id: UUID(uuidString: "A119C872-52B4-4C2E-9232-58F8C2F2B2A2")!,
+        name: "Workstation",
+        baseURL: URL(string: "http://192.168.0.156:47821")!
+    )
 }
 
 struct RemoteApplication: Identifiable, Codable, Hashable {
