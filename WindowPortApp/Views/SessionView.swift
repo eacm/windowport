@@ -175,8 +175,10 @@ struct SessionView: View {
         // PrintWindow's rendered content sits slightly below the window's screen
         // input coordinates. Calibrate the remote hotspot so the visible arrow tip,
         // rather than the body of the cursor, is the point that activates controls.
-        let hotspotCorrection: CGFloat = 12
-        let remotePoint = CGPoint(x: point.x, y: point.y - hotspotCorrection)
+        // The captured Chromium frame is offset from its screen-input surface by
+        // roughly the cursor's lower-left tail vector. Move the Windows hotspot
+        // back to the arrow's visible top tip.
+        let remotePoint = CGPoint(x: point.x - 3, y: point.y - 37)
         let bounded = clamped(remotePoint, to: size)
         return PointerEvent(kind: kind, x: bounded.x / size.width, y: bounded.y / size.height, deltaY: nil)
     }
