@@ -81,7 +81,11 @@ struct SessionView: View {
             RemoteKeyboardView(
                 isFocused: $keyboardFocused,
                 onText: { text in Task { await store.send(text: text) } },
-                onKey: { key in Task { await store.send(key: key) } }
+                onKey: { key in Task { await store.send(key: key) } },
+                onDismiss: {
+                    keyboardFocused = false
+                    showsKeyboardEntry = false
+                }
             )
             .frame(width: 1, height: 1)
             .opacity(0.01)

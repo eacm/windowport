@@ -7,8 +7,9 @@ struct RemoteKeyboardView: UIViewRepresentable {
     @Binding var isFocused: Bool
     let onText: (String) -> Void
     let onKey: (RemoteKeyEvent) -> Void
+    let onDismiss: () -> Void
 
-    func makeCoordinator() -> Coordinator { Coordinator(onText: onText) }
+    func makeCoordinator() -> Coordinator { Coordinator(onText: onText, onDismiss: onDismiss) }
 
     func makeUIView(context: Context) -> RemoteTextView {
         let view = RemoteTextView()
@@ -21,6 +22,14 @@ struct RemoteKeyboardView: UIViewRepresentable {
         view.returnKeyType = .default
         view.text = " "
         view.selectedRange = NSRange(location: 1, length: 0)
+        context.coordinator.textView = view
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        toolbar.items = [
+            UIBarButtonItem(systemItem: .flexibleSpace),
+            UIBarButtonItem(title: "Minimize", style: .done, target: context.coordinator, action: #selector(Coordinator.dismissKeyboard))
+        ]
+        view.inputAccessoryView = toolbar
         return view
     }
 
@@ -35,7 +44,18 @@ struct RemoteKeyboardView: UIViewRepresentable {
 
     final class Coordinator: NSObject, UITextViewDelegate {
         let onText: (String) -> Void
-        init(onText: @escaping (String) -> Void) { self.onText = onText }
+        let onDismiss: () -> Void
+        weak var textView: UITextView?
+
+        init(onText: @escaping (String) -> Void, onDismiss: @escaping () -> Void) {
+            self.onText = onText
+            self.onDismiss = onDismiss
+        }
+
+        @objc func dismissKeyboard() {
+            textView?.resignFirstResponder()
+            onDismiss()
+        }
 
         func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
             if text.isEmpty { onText("\u{8}") }
