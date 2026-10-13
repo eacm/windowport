@@ -1,10 +1,11 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using WindowPort.Host.Contracts;
 
 namespace WindowPort.Host.Services;
 
-public sealed record HostSession(Guid Id, PublishedApplication Application, Process Process);
+public sealed record HostSession(Guid Id, PublishedApplication Application, Process Process, int Width, int Height);
 
 public sealed class SessionManager
 {
@@ -16,7 +17,8 @@ public sealed class SessionManager
         var launched = Process.Start(start) ?? throw new InvalidOperationException($"Windows could not start {app.Name}.");
         var processName = Path.GetFileNameWithoutExtension(app.Executable);
         var process = ResolveVisibleProcess(launched, processName);
-        var session = new HostSession(Guid.NewGuid(), app, process);
+        var size = GetWindowSize(process.MainWindowHandle);
+        var session = new HostSession(Guid.NewGuid(), app, process, size.Width, size.Height);
         _sessions[session.Id] = session;
         return session;
     }
@@ -42,5 +44,16 @@ public sealed class SessionManager
         if (!launched.HasExited) return launched;
         throw new InvalidOperationException($"The app started but Port could not find its visible window.");
     }
+
+    private static (int Width, int Height) GetWindowSize(IntPtr handle)
+    {
+        if (handle != IntPtr.Zero && GetWindowRect(handle, out var rect))
+            return (Math.Max(1, rect.Right - rect.Left), Math.Max(1, rect.Bottom - rect.Top));
+        return (1280, 720);
+    }
+
+    [DllImport("user32.dll")]
+    private static extern bool GetWindowRect(IntPtr handle, out Rect rect);
+    private struct Rect { public int Left, Top, Right, Bottom; }
 }
 

@@ -26,7 +26,7 @@ struct WindowPortClient: WindowPortServing {
 
     func launch(_ app: RemoteApplication, on host: WindowsHost) async throws -> RemoteSession {
         if host.isDemo {
-            return RemoteSession(id: UUID(), application: app, streamURL: URL(string: "demo://session")!)
+            return RemoteSession(id: UUID(), application: app, streamURL: URL(string: "demo://session")!, width: 1280, height: 720)
         }
         var request = request(path: "/api/apps/\(app.id)/launch", host: host)
         request.httpMethod = "POST"

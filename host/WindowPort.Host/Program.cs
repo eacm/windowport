@@ -35,7 +35,7 @@ app.MapPost("/api/apps/{id}/launch", async (string id, HttpRequest request, AppC
     if (selected is null) return Results.NotFound();
     var session = sessions.Launch(selected);
     var stream = new Uri($"{request.Scheme}://{request.Host}/api/sessions/{session.Id}/stream");
-    return Results.Ok(new RemoteSession(session.Id, selected, stream));
+    return Results.Ok(new RemoteSession(session.Id, selected, stream, session.Width, session.Height));
 });
 
 app.MapGet("/api/sessions/{id:guid}/stream", async (Guid id, HttpResponse response, SessionManager sessions, WindowCapture capture, CancellationToken token) =>

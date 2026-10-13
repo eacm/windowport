@@ -38,9 +38,11 @@ struct RemoteSession: Identifiable, Codable, Hashable {
     let id: UUID
     let application: RemoteApplication
     let streamURL: URL
+    let width: Int?
+    let height: Int?
 
     enum CodingKeys: String, CodingKey {
-        case id, application
+        case id, application, width, height
         case streamURL = "streamUrl"
     }
 }

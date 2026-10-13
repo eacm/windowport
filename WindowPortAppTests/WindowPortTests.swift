@@ -13,10 +13,11 @@ final class WindowPortTests: XCTestCase {
     }
 
     func testHostSessionResponseDecodesCamelCaseURL() throws {
-        let json = #"{"id":"33fb9d30-68c1-47d6-bb16-54ac0f869631","application":{"id":"brave","name":"Brave","executable":"brave.exe","arguments":null,"category":"Browser","iconUrl":null},"streamUrl":"http://192.168.0.156:47821/api/sessions/33fb9d30-68c1-47d6-bb16-54ac0f869631/stream"}"#.data(using: .utf8)!
+        let json = #"{"id":"33fb9d30-68c1-47d6-bb16-54ac0f869631","application":{"id":"brave","name":"Brave","executable":"brave.exe","arguments":null,"category":"Browser","iconUrl":null},"streamUrl":"http://192.168.0.156:47821/api/sessions/33fb9d30-68c1-47d6-bb16-54ac0f869631/stream","width":809,"height":769}"#.data(using: .utf8)!
         let session = try JSONDecoder().decode(RemoteSession.self, from: json)
         XCTAssertEqual(session.application.name, "Brave")
         XCTAssertEqual(session.streamURL.host, "192.168.0.156")
+        XCTAssertEqual(session.width, 809)
     }
 }
 
