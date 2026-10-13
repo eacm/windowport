@@ -35,11 +35,9 @@ struct SessionView: View {
                             .fill(Color.white.opacity(0.001))
                             .contentShape(Rectangle())
                             .gesture(joystickGesture(in: geometry.size), including: .gesture)
-                        Image(systemName: "cursorarrow")
-                            .font(.system(size: 25, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .shadow(color: .black, radius: 2, x: 1, y: 1)
-                            .position(clamped(cursorPosition ?? CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2), to: geometry.size))
+                        PointerCursor()
+                            .frame(width: 24, height: 32)
+                            .position(pointerDisplayPosition(in: geometry.size))
                             .allowsHitTesting(false)
                     }
                     .frame(width: geometry.size.width, height: geometry.size.height)
@@ -181,6 +179,13 @@ struct SessionView: View {
         CGPoint(x: min(max(point.x, 0), size.width), y: min(max(point.y, 0), size.height))
     }
 
+    private func pointerDisplayPosition(in size: CGSize) -> CGPoint {
+        let clickPoint = clamped(cursorPosition ?? CGPoint(x: size.width / 2, y: size.height / 2), to: size)
+        // PointerCursor's hotspot is its top-left tip; position() addresses the
+        // center of the view, so offset by half its dimensions.
+        return CGPoint(x: clickPoint.x + 12, y: clickPoint.y + 16)
+    }
+
     private func updateSurface(_ size: CGSize) {
         guard size.width > 0, size.height > 0 else { return }
         surfaceSize = size
@@ -195,6 +200,25 @@ struct SessionView: View {
             guard !Task.isCancelled else { return }
             streamRevision += 1
         }
+    }
+}
+
+private struct PointerCursor: View {
+    var body: some View {
+        Canvas { context, _ in
+            var pointer = Path()
+            pointer.move(to: .zero)
+            pointer.addLine(to: CGPoint(x: 3, y: 25))
+            pointer.addLine(to: CGPoint(x: 9, y: 18))
+            pointer.addLine(to: CGPoint(x: 15, y: 31))
+            pointer.addLine(to: CGPoint(x: 20, y: 28))
+            pointer.addLine(to: CGPoint(x: 14, y: 16))
+            pointer.addLine(to: CGPoint(x: 24, y: 15))
+            pointer.closeSubpath()
+            context.fill(pointer, with: .color(.white))
+            context.stroke(pointer, with: .color(.black), lineWidth: 2)
+        }
+        .shadow(color: .black.opacity(0.5), radius: 2, x: 1, y: 1)
     }
 }
 
