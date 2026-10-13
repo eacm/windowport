@@ -52,7 +52,7 @@ private struct AddHostView: View {
                     TextField("http://192.168.1.25:47821", text: $address)
                         .textInputAutocapitalization(.never).keyboardType(.URL)
                 }
-                Section { Text("Start WindowPort.Host on your PC, then enter its private IP address.").font(.footnote).foregroundStyle(.secondary) }
+                Section { Text("Start the Port host on your PC, then enter its private IP address.").font(.footnote).foregroundStyle(.secondary) }
             }
             .navigationTitle("Add Host")
             .navigationBarTitleDisplayMode(.inline)

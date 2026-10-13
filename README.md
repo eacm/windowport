@@ -1,8 +1,8 @@
-# WindowPort
+# Port
 
 **Your Windows apps. One window at a time.**
 
-WindowPort is an open-source iPhone and iPad client plus a small Windows host.
+Port is an open-source iPhone and iPad client plus a small Windows host.
 Instead of exposing an entire Windows desktop, the host publishes only the apps
 you select. The iOS app presents those apps as a private catalog and opens each
 one in a focused touch-friendly session.

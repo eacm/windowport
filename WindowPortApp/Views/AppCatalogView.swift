@@ -25,7 +25,7 @@ struct AppCatalogView: View {
                     }
                 }
             }
-            .navigationTitle("WindowPort")
+            .navigationTitle("Port")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {

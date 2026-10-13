@@ -39,6 +39,7 @@
 		9314BE73F83FCCCEADE5EABD /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		966F40654D12AB790F2BE2EC /* WindowPortTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowPortTests.swift; sourceTree = "<group>"; };
 		A31F20C18C8E5A9C7A3C98F7 /* MJPEGStreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MJPEGStreamView.swift; sourceTree = "<group>"; };
+		B0F51CCD2CBC0837C72BA262 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		B77B7A507A2360E30D2A28BB /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
 		BC644DF80105420504DD4EA2 /* WindowPortTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = WindowPortTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD68D6FE98EEDC25C371C05E /* HostsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostsView.swift; sourceTree = "<group>"; };
@@ -84,6 +85,7 @@
 		6C414435EF95F3E55BEEF180 /* WindowPortApp */ = {
 			isa = PBXGroup;
 			children = (
+				B0F51CCD2CBC0837C72BA262 /* Info.plist */,
 				19590DEED872B1F0B5E122EA /* App */,
 				B5A1D5373B33FFAB5386B66B /* Models */,
 				AE4291C0A123D72A62704B9E /* Networking */,
@@ -321,12 +323,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = WindowPort;
-				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsArbitraryLoads = YES;
-				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsLocalNetworking = YES;
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "WindowPort connects to your Windows computer to show the apps you choose.";
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_FILE = WindowPortApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -343,12 +340,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = WindowPort;
-				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsArbitraryLoads = YES;
-				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsLocalNetworking = YES;
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "WindowPort connects to your Windows computer to show the apps you choose.";
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_FILE = WindowPortApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

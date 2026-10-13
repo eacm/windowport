@@ -13,7 +13,7 @@ struct RootView: View {
         }
         .tint(.mint)
         .fullScreenCover(item: $store.activeSession) { SessionView(session: $0) }
-        .alert("WindowPort", isPresented: Binding(
+        .alert("Port", isPresented: Binding(
             get: { store.errorMessage != nil },
             set: { if !$0 { store.errorMessage = nil } }
         )) { Button("OK") { store.errorMessage = nil } } message: {
