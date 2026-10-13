@@ -30,6 +30,11 @@ struct SessionView: View {
                     ZStack {
                         MJPEGStreamView(url: session.streamURL)
                             .id(streamRevision)
+                            .allowsHitTesting(false)
+                        Rectangle()
+                            .fill(Color.white.opacity(0.001))
+                            .contentShape(Rectangle())
+                            .gesture(joystickGesture(in: geometry.size), including: .gesture)
                         Image(systemName: "cursorarrow")
                             .font(.system(size: 25, weight: .semibold))
                             .foregroundStyle(.white)
@@ -38,8 +43,6 @@ struct SessionView: View {
                             .allowsHitTesting(false)
                     }
                     .frame(width: geometry.size.width, height: geometry.size.height)
-                    .contentShape(Rectangle())
-                    .gesture(joystickGesture(in: geometry.size))
                     .onAppear { updateSurface(geometry.size) }
                     .onChange(of: geometry.size) { _, size in updateSurface(size) }
                 }

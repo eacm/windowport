@@ -58,8 +58,8 @@ app.MapGet("/api/sessions/{id:guid}/stream", async (Guid id, HttpResponse respon
 app.MapPost("/api/sessions/{id:guid}/pointer", (Guid id, PointerEvent input, SessionManager sessions, InputService service) =>
 {
     if (!sessions.TryGet(id, out var session)) return Results.NotFound();
-    service.Pointer(session, input);
-    return Results.NoContent();
+    var result = service.Pointer(session, input);
+    return result is null ? Results.BadRequest() : Results.Ok(result);
 });
 
 app.MapPost("/api/sessions/{id:guid}/text", (Guid id, TextEvent input, SessionManager sessions, InputService service) =>

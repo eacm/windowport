@@ -21,10 +21,10 @@ public sealed class InputService
         ["f9"] = 0x78, ["f10"] = 0x79, ["f11"] = 0x7A, ["f12"] = 0x7B
     };
 
-    public void Pointer(HostSession session, PointerEvent input)
+    public PointerResult? Pointer(HostSession session, PointerEvent input)
     {
         var handle = session.Process.MainWindowHandle;
-        if (handle == IntPtr.Zero || !GetWindowRect(handle, out var rect)) return;
+        if (handle == IntPtr.Zero || !GetWindowRect(handle, out var rect)) return null;
         SetForegroundWindow(handle);
 
         var screenLeft = GetSystemMetrics(76);
@@ -40,7 +40,9 @@ public sealed class InputService
         if (input.Kind == "down") inputs.Add(MouseInput(0, 0, 0, MouseLeftDown));
         if (input.Kind == "up") inputs.Add(MouseInput(0, 0, 0, MouseLeftUp));
         if (input.Kind == "scroll") inputs.Add(MouseInput(0, 0, input.DeltaY ?? 0, MouseWheel));
-        Send(inputs);
+        var sent = Send(inputs);
+        GetCursorPos(out var cursor);
+        return new PointerResult(sent, (int)pixelX, (int)pixelY, cursor.X, cursor.Y, Marshal.GetLastWin32Error());
     }
 
     public void Text(HostSession session, string text)
@@ -88,10 +90,10 @@ public sealed class InputService
     private static bool IsExtended(ushort key) => key is >= 0x21 and <= 0x28 or 0x2E;
     private static void SendUnicode(char character) => Send(new[] { KeyboardInput(character, KeyUnicode), KeyboardInput(character, KeyUnicode | KeyUp) });
     private static void SendVirtualKey(ushort key) => Send(new[] { KeyboardInput(key, 0), KeyboardInput(key, KeyUp) });
-    private static void Send(IEnumerable<Input> source)
+    private static uint Send(IEnumerable<Input> source)
     {
         var inputs = source.ToArray();
-        if (inputs.Length > 0) SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<Input>());
+        return inputs.Length > 0 ? SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<Input>()) : 0;
     }
 
     private static Input KeyboardInput(ushort value, uint flags) => new()
@@ -108,6 +110,7 @@ public sealed class InputService
     [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr handle, out Rect rect);
     [DllImport("user32.dll")] private static extern bool SetForegroundWindow(IntPtr handle);
     [DllImport("user32.dll")] private static extern int GetSystemMetrics(int index);
+    [DllImport("user32.dll")] private static extern bool GetCursorPos(out Point point);
     [DllImport("user32.dll")] private static extern short VkKeyScan(char character);
     [DllImport("user32.dll", SetLastError = true)] private static extern uint SendInput(uint count, Input[] inputs, int size);
     [StructLayout(LayoutKind.Sequential)] private struct Input { public uint Type; public InputUnion Data; }
@@ -129,4 +132,5 @@ public sealed class InputService
         public UIntPtr ExtraInfo;
     }
     private struct Rect { public int Left, Top, Right, Bottom; }
+    private struct Point { public int X, Y; }
 }
