@@ -13,6 +13,10 @@ struct SessionView: View {
     @State private var streamRevision = 0
     @State private var joystickTask: Task<Void, Never>?
     @State private var resizeTask: Task<Void, Never>?
+    @State private var bannerOffset = CGSize.zero
+    @State private var bannerDragOrigin = CGSize.zero
+    @State private var bannerCollapsed = false
+    @State private var bannerCollapseTask: Task<Void, Never>?
     @FocusState private var keyboardFocused: Bool
 
     var body: some View {
@@ -47,12 +51,7 @@ struct SessionView: View {
                 .ignoresSafeArea()
             }
             VStack {
-                HStack {
-                    Label(session.application.name, systemImage: "lock.fill").font(.subheadline.bold())
-                    Spacer()
-                    Button { store.activeSession = nil } label: { Image(systemName: "xmark.circle.fill").font(.title2) }
-                }
-                .padding(12).background(.ultraThinMaterial, in: Capsule()).padding()
+                movableBanner
                 Spacer()
                 if showsKeyboardEntry {
                     HStack(spacing: 12) {
@@ -92,6 +91,74 @@ struct SessionView: View {
         .onDisappear {
             joystickTask?.cancel()
             resizeTask?.cancel()
+            bannerCollapseTask?.cancel()
+        }
+        .onAppear { scheduleBannerCollapse() }
+    }
+
+    @ViewBuilder
+    private var movableBanner: some View {
+        if bannerCollapsed {
+            closeButton
+                .padding(8)
+                .background(.ultraThinMaterial, in: Circle())
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .offset(bannerOffset)
+                .simultaneousGesture(bannerDragGesture)
+                .transition(.scale.combined(with: .opacity))
+        } else {
+            HStack {
+                Label(session.application.name, systemImage: "lock.fill")
+                    .font(.subheadline.bold())
+                Spacer()
+                closeButton
+            }
+            .padding(12)
+            .background(.ultraThinMaterial, in: Capsule())
+            .padding()
+            .offset(bannerOffset)
+            .simultaneousGesture(bannerDragGesture)
+            .onTapGesture {
+                withAnimation(.snappy) { bannerCollapsed = true }
+                bannerCollapseTask?.cancel()
+            }
+            .transition(.scale.combined(with: .opacity))
+        }
+    }
+
+    private var closeButton: some View {
+        Button { store.activeSession = nil } label: {
+            Image(systemName: "xmark.circle.fill")
+                .font(.system(size: 34, weight: .semibold))
+                .foregroundStyle(.blue)
+        }
+    }
+
+    private var bannerDragGesture: some Gesture {
+        DragGesture(minimumDistance: 4)
+            .onChanged { value in
+                bannerCollapseTask?.cancel()
+                if bannerCollapsed {
+                    withAnimation(.snappy) { bannerCollapsed = false }
+                }
+                bannerOffset = CGSize(
+                    width: bannerDragOrigin.width + value.translation.width,
+                    height: bannerDragOrigin.height + value.translation.height
+                )
+            }
+            .onEnded { _ in
+                bannerDragOrigin = bannerOffset
+                scheduleBannerCollapse()
+            }
+    }
+
+    private func scheduleBannerCollapse() {
+        bannerCollapseTask?.cancel()
+        bannerCollapseTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled else { return }
+            withAnimation(.snappy) { bannerCollapsed = true }
         }
     }
 
