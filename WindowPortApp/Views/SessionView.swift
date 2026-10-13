@@ -70,8 +70,7 @@ struct SessionView: View {
                 } else {
                     HStack(spacing: 20) {
                         Button {
-                            showsKeyboardEntry = true
-                            Task { await Task.yield(); keyboardFocused = true }
+                            showKeyboard()
                         } label: { Label("Keyboard", systemImage: "keyboard") }
                         Button { Task { await store.send(PointerEvent(kind: .scroll, x: 0.5, y: 0.5, deltaY: -160)) } } label: { Label("Scroll", systemImage: "arrow.up.and.down") }
                     }
@@ -88,6 +87,7 @@ struct SessionView: View {
             .opacity(0.01)
         }
         .statusBarHidden()
+        .ignoresSafeArea(.keyboard)
         .onDisappear {
             joystickTask?.cancel()
             resizeTask?.cancel()
@@ -200,12 +200,21 @@ struct SessionView: View {
                 joystickTask = nil
                 gestureDistance = 0
                 if shouldClick {
+                    showKeyboard()
                     Task {
                         await store.send(event(.down, at: point, in: size))
                         await store.send(event(.up, at: point, in: size))
                     }
                 }
             }
+    }
+
+    private func showKeyboard() {
+        showsKeyboardEntry = true
+        Task { @MainActor in
+            await Task.yield()
+            keyboardFocused = true
+        }
     }
 
     private func startJoystick() {
