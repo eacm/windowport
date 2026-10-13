@@ -99,14 +99,16 @@ struct SessionView: View {
     @ViewBuilder
     private var movableBanner: some View {
         if bannerCollapsed {
-            closeButton
-                .padding(8)
-                .background(.ultraThinMaterial, in: Circle())
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .offset(bannerOffset)
-                .simultaneousGesture(bannerDragGesture)
-                .transition(.scale.combined(with: .opacity))
+            HStack {
+                Spacer()
+                closeButton
+                    .padding(8)
+                    .background(.ultraThinMaterial, in: Circle())
+                    .padding()
+                    .offset(bannerOffset)
+                    .simultaneousGesture(bannerDragGesture)
+                    .transition(.scale.combined(with: .opacity))
+            }
         } else {
             HStack {
                 Label(session.application.name, systemImage: "lock.fill")
@@ -242,14 +244,7 @@ struct SessionView: View {
     }
 
     private func event(_ kind: PointerEventKind, at point: CGPoint, in size: CGSize) -> PointerEvent {
-        // PrintWindow's rendered content sits slightly below the window's screen
-        // input coordinates. Calibrate the remote hotspot so the visible arrow tip,
-        // rather than the body of the cursor, is the point that activates controls.
-        // The captured Chromium frame is offset from its screen-input surface by
-        // roughly the cursor's lower-left tail vector. Move the Windows hotspot
-        // back to the arrow's visible top tip.
-        let remotePoint = CGPoint(x: point.x - 3, y: point.y - 37)
-        let bounded = clamped(remotePoint, to: size)
+        let bounded = clamped(point, to: size)
         return PointerEvent(kind: kind, x: bounded.x / size.width, y: bounded.y / size.height, deltaY: nil)
     }
 
