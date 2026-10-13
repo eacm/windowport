@@ -27,12 +27,22 @@ struct RemoteApplication: Identifiable, Codable, Hashable {
     let arguments: String?
     let category: String?
     let iconURL: URL?
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, executable, arguments, category
+        case iconURL = "iconUrl"
+    }
 }
 
 struct RemoteSession: Identifiable, Codable, Hashable {
     let id: UUID
     let application: RemoteApplication
     let streamURL: URL
+
+    enum CodingKeys: String, CodingKey {
+        case id, application
+        case streamURL = "streamUrl"
+    }
 }
 
 enum PointerEventKind: String, Codable { case move, down, up, scroll }

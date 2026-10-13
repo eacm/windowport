@@ -46,4 +46,7 @@ targets:
       - path: WindowPortAppTests
     dependencies:
       - target: WindowPort
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
 
