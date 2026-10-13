@@ -40,7 +40,7 @@ struct SessionView: View {
                             .contentShape(Rectangle())
                             .gesture(joystickGesture(in: geometry.size), including: .gesture)
                         PointerCursor()
-                            .frame(width: 24, height: 32)
+                            .frame(width: 16, height: 22)
                             .position(pointerDisplayPosition(in: geometry.size))
                             .allowsHitTesting(false)
                     }
@@ -265,7 +265,7 @@ struct SessionView: View {
         let clickPoint = clamped(cursorPosition ?? CGPoint(x: size.width / 2, y: size.height / 2), to: size)
         // PointerCursor's hotspot is its top-left tip; position() addresses the
         // center of the view, so offset by half its dimensions.
-        return CGPoint(x: clickPoint.x + 12, y: clickPoint.y + 16)
+        return CGPoint(x: clickPoint.x + 8, y: clickPoint.y + 11)
     }
 
     private func updateSurface(_ size: CGSize) {
@@ -287,15 +287,15 @@ struct SessionView: View {
 
 private struct PointerCursor: View {
     var body: some View {
-        Canvas { context, _ in
+        Canvas { context, size in
             var pointer = Path()
             pointer.move(to: .zero)
-            pointer.addLine(to: CGPoint(x: 3, y: 25))
-            pointer.addLine(to: CGPoint(x: 9, y: 18))
-            pointer.addLine(to: CGPoint(x: 15, y: 31))
-            pointer.addLine(to: CGPoint(x: 20, y: 28))
-            pointer.addLine(to: CGPoint(x: 14, y: 16))
-            pointer.addLine(to: CGPoint(x: 24, y: 15))
+            pointer.addLine(to: CGPoint(x: size.width * 0.125, y: size.height * 0.78))
+            pointer.addLine(to: CGPoint(x: size.width * 0.375, y: size.height * 0.56))
+            pointer.addLine(to: CGPoint(x: size.width * 0.625, y: size.height * 0.97))
+            pointer.addLine(to: CGPoint(x: size.width * 0.83, y: size.height * 0.875))
+            pointer.addLine(to: CGPoint(x: size.width * 0.58, y: size.height * 0.5))
+            pointer.addLine(to: CGPoint(x: size.width, y: size.height * 0.47))
             pointer.closeSubpath()
             context.fill(pointer, with: .color(.white))
             context.stroke(pointer, with: .color(.black), lineWidth: 2)
