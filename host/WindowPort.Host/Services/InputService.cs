@@ -39,6 +39,11 @@ public sealed class InputService
         var inputs = new List<Input> { MouseInput(absoluteX, absoluteY, 0, MouseMove | MouseAbsolute | MouseVirtualDesk) };
         if (input.Kind == "down") inputs.Add(MouseInput(0, 0, 0, MouseLeftDown));
         if (input.Kind == "up") inputs.Add(MouseInput(0, 0, 0, MouseLeftUp));
+        if (input.Kind == "click")
+        {
+            inputs.Add(MouseInput(0, 0, 0, MouseLeftDown));
+            inputs.Add(MouseInput(0, 0, 0, MouseLeftUp));
+        }
         if (input.Kind == "scroll") inputs.Add(MouseInput(0, 0, input.DeltaY ?? 0, MouseWheel));
         var sent = Send(inputs);
         GetCursorPos(out var cursor);

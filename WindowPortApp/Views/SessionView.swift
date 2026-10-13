@@ -204,10 +204,7 @@ struct SessionView: View {
                 joystickTask = nil
                 gestureDistance = 0
                 if shouldClick {
-                    Task {
-                        await store.send(event(.down, at: point, in: size))
-                        await store.send(event(.up, at: point, in: size))
-                    }
+                    Task { await store.send(event(.click, at: point, in: size)) }
                 }
             }
     }
