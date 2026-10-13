@@ -5,7 +5,8 @@ struct SessionView: View {
     let session: RemoteSession
     @State private var keyboardText = ""
     @State private var cursorPosition: CGPoint?
-    @State private var pointerIsDown = false
+    @State private var lastFingerPosition: CGPoint?
+    @State private var totalMovement: CGFloat = 0
     @FocusState private var keyboardFocused: Bool
 
     var body: some View {
@@ -27,12 +28,12 @@ struct SessionView: View {
                             .font(.system(size: 25, weight: .semibold))
                             .foregroundStyle(.white)
                             .shadow(color: .black, radius: 2, x: 1, y: 1)
-                            .position(cursorPosition ?? CGPoint(x: surface.width / 2, y: surface.height / 2))
+                            .position(clamped(cursorPosition ?? CGPoint(x: surface.width / 2, y: surface.height / 2), to: surface))
                             .allowsHitTesting(false)
                     }
                     .frame(width: surface.width, height: surface.height)
                     .contentShape(Rectangle())
-                    .gesture(pointerGesture(in: surface))
+                    .gesture(trackpadGesture(in: surface))
                     .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
                 }
                 .ignoresSafeArea()
@@ -61,20 +62,43 @@ struct SessionView: View {
         .statusBarHidden()
     }
 
-    private func pointerGesture(in size: CGSize) -> some Gesture {
+    private func trackpadGesture(in size: CGSize) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { value in
-                let point = clamped(value.location, to: size)
-                cursorPosition = point
-                let kind: PointerEventKind = pointerIsDown ? .move : .down
-                pointerIsDown = true
-                Task { await store.send(event(kind, at: point, in: size)) }
+                guard let previous = lastFingerPosition else {
+                    lastFingerPosition = value.location
+                    totalMovement = 0
+                    if cursorPosition == nil {
+                        cursorPosition = CGPoint(x: size.width / 2, y: size.height / 2)
+                    }
+                    return
+                }
+
+                let deltaX = value.location.x - previous.x
+                let deltaY = value.location.y - previous.y
+                totalMovement += hypot(deltaX, deltaY)
+                lastFingerPosition = value.location
+
+                let current = clamped(cursorPosition ?? CGPoint(x: size.width / 2, y: size.height / 2), to: size)
+                let speed = pointerSpeed(for: hypot(deltaX, deltaY))
+                let next = clamped(
+                    CGPoint(x: current.x + deltaX * speed, y: current.y + deltaY * speed),
+                    to: size
+                )
+                cursorPosition = next
+                Task { await store.send(event(.move, at: next, in: size)) }
             }
-            .onEnded { value in
-                let point = clamped(value.location, to: size)
-                cursorPosition = point
-                pointerIsDown = false
-                Task { await store.send(event(.up, at: point, in: size)) }
+            .onEnded { _ in
+                let point = cursorPosition ?? CGPoint(x: size.width / 2, y: size.height / 2)
+                let shouldClick = totalMovement < 10
+                lastFingerPosition = nil
+                totalMovement = 0
+                if shouldClick {
+                    Task {
+                        await store.send(event(.down, at: point, in: size))
+                        await store.send(event(.up, at: point, in: size))
+                    }
+                }
             }
     }
 
@@ -84,6 +108,14 @@ struct SessionView: View {
 
     private func clamped(_ point: CGPoint, to size: CGSize) -> CGPoint {
         CGPoint(x: min(max(point.x, 0), size.width), y: min(max(point.y, 0), size.height))
+    }
+
+    private func pointerSpeed(for fingerDelta: CGFloat) -> CGFloat {
+        switch fingerDelta {
+        case ..<2: 0.9
+        case ..<8: 1.35
+        default: 1.8
+        }
     }
 
     private func fittedSize(in container: CGSize) -> CGSize {
