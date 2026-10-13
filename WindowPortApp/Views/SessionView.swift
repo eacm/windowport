@@ -1,5 +1,4 @@
 import SwiftUI
-import Combine
 
 struct SessionView: View {
     @Environment(AppStore.self) private var store
@@ -12,8 +11,10 @@ struct SessionView: View {
     @State private var gestureDistance: CGFloat = 0
     @State private var surfaceSize = CGSize.zero
     @State private var lastPointerSend = Date.distantPast
+    @State private var streamRevision = 0
+    @State private var joystickTask: Task<Void, Never>?
+    @State private var resizeTask: Task<Void, Never>?
     @FocusState private var keyboardFocused: Bool
-    private let pointerClock = Timer.publish(every: 1.0 / 60.0, on: .main, in: .common).autoconnect()
 
     var body: some View {
         ZStack {
@@ -29,6 +30,7 @@ struct SessionView: View {
                 GeometryReader { geometry in
                     ZStack {
                         MJPEGStreamView(url: session.streamURL)
+                            .id(streamRevision)
                         Image(systemName: "cursorarrow")
                             .font(.system(size: 25, weight: .semibold))
                             .foregroundStyle(.white)
@@ -88,7 +90,10 @@ struct SessionView: View {
             guard !value.isEmpty else { return }
             Task { await store.send(text: value); keyboardText = "" }
         }
-        .onReceive(pointerClock) { _ in advancePointer() }
+        .onDisappear {
+            joystickTask?.cancel()
+            resizeTask?.cancel()
+        }
     }
 
     private func joystickGesture(in size: CGSize) -> some Gesture {
@@ -109,12 +114,15 @@ struct SessionView: View {
                 let radius: CGFloat = 70
                 let scale = distance > radius ? radius / distance : 1
                 joystickVector = CGVector(dx: dx * scale / radius, dy: dy * scale / radius)
+                startJoystick()
             }
             .onEnded { _ in
                 let point = cursorPosition ?? CGPoint(x: size.width / 2, y: size.height / 2)
                 let shouldClick = gestureDistance < 8
                 joystickOrigin = nil
                 joystickVector = .zero
+                joystickTask?.cancel()
+                joystickTask = nil
                 gestureDistance = 0
                 if shouldClick {
                     Task {
@@ -125,11 +133,21 @@ struct SessionView: View {
             }
     }
 
+    private func startJoystick() {
+        guard joystickTask == nil else { return }
+        joystickTask = Task { @MainActor in
+            while !Task.isCancelled {
+                advancePointer()
+                try? await Task.sleep(for: .milliseconds(16))
+            }
+        }
+    }
+
     private func advancePointer() {
         guard surfaceSize.width > 0, surfaceSize.height > 0,
               abs(joystickVector.dx) > 0.01 || abs(joystickVector.dy) > 0.01 else { return }
         let current = clamped(cursorPosition ?? CGPoint(x: surfaceSize.width / 2, y: surfaceSize.height / 2), to: surfaceSize)
-        let maximumSpeed: CGFloat = 20
+        let maximumSpeed: CGFloat = 24
         let next = clamped(CGPoint(
             x: current.x + joystickVector.dx * maximumSpeed,
             y: current.y + joystickVector.dy * maximumSpeed
@@ -152,9 +170,19 @@ struct SessionView: View {
     }
 
     private func updateSurface(_ size: CGSize) {
+        guard size.width > 0, size.height > 0 else { return }
         surfaceSize = size
         cursorPosition = clamped(cursorPosition ?? CGPoint(x: size.width / 2, y: size.height / 2), to: size)
-        Task { await store.resizeSession(to: size) }
+        resizeTask?.cancel()
+        resizeTask = Task { @MainActor in
+            await store.resizeSession(to: size)
+            guard !Task.isCancelled else { return }
+            // An MJPEG decoder keeps the dimensions of its first frame. Recreate it
+            // after Windows has resized the source window for the new orientation.
+            try? await Task.sleep(for: .milliseconds(250))
+            guard !Task.isCancelled else { return }
+            streamRevision += 1
+        }
     }
 }
 

@@ -22,7 +22,7 @@ struct MJPEGStreamView: UIViewRepresentable {
             .replacingOccurrences(of: "\"", with: "&quot;")
         let html = """
         <!doctype html><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-        <style>html,body{margin:0;width:100%;height:100%;background:#000;overflow:hidden}img{width:100%;height:100%;object-fit:contain}</style>
+        <style>html,body{margin:0;width:100%;height:100%;background:#000;overflow:hidden}img{display:block;width:100%;height:100%;object-fit:fill}</style>
         <img src="\(escaped)" alt="WindowPort stream">
         """
         view.loadHTMLString(html, baseURL: url.deletingLastPathComponent())
