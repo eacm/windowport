@@ -88,6 +88,11 @@ final class AppStore {
         try? await client.send(text: text, sessionID: activeSession.id, to: selectedHost)
     }
 
+    func resizeSession(to size: CGSize) async {
+        guard let activeSession else { return }
+        try? await client.resize(sessionID: activeSession.id, width: Int(size.width), height: Int(size.height), on: selectedHost)
+    }
+
     private func saveHosts() {
         defaults.set(try? JSONEncoder().encode(hosts.filter { !$0.isDemo }), forKey: "hosts")
     }

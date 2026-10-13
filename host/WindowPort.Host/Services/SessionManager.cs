@@ -25,6 +25,23 @@ public sealed class SessionManager
 
     public bool TryGet(Guid id, out HostSession session) => _sessions.TryGetValue(id, out session!);
 
+    public void Resize(HostSession session, int requestedWidth, int requestedHeight)
+    {
+        if (requestedWidth <= 0 || requestedHeight <= 0) return;
+        var screenWidth = GetSystemMetrics(0);
+        var screenHeight = GetSystemMetrics(1);
+        var targetAspect = (double)requestedWidth / requestedHeight;
+        var screenAspect = (double)screenWidth / screenHeight;
+        var width = screenWidth;
+        var height = screenHeight;
+        if (screenAspect > targetAspect) width = Math.Max(480, (int)(height * targetAspect));
+        else height = Math.Max(360, (int)(width / targetAspect));
+        var x = Math.Max(0, (screenWidth - width) / 2);
+        var y = Math.Max(0, (screenHeight - height) / 2);
+        ShowWindow(session.Process.MainWindowHandle, 9);
+        SetWindowPos(session.Process.MainWindowHandle, IntPtr.Zero, x, y, width, height, 0x0040);
+    }
+
     private static Process ResolveVisibleProcess(Process launched, string processName)
     {
         for (var attempt = 0; attempt < 40; attempt++)
@@ -54,6 +71,12 @@ public sealed class SessionManager
 
     [DllImport("user32.dll")]
     private static extern bool GetWindowRect(IntPtr handle, out Rect rect);
+    [DllImport("user32.dll")]
+    private static extern bool SetWindowPos(IntPtr handle, IntPtr insertAfter, int x, int y, int width, int height, uint flags);
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr handle, int command);
+    [DllImport("user32.dll")]
+    private static extern int GetSystemMetrics(int index);
     private struct Rect { public int Left, Top, Right, Bottom; }
 }
 

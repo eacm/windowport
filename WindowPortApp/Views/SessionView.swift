@@ -1,13 +1,19 @@
 import SwiftUI
+import Combine
 
 struct SessionView: View {
     @Environment(AppStore.self) private var store
     let session: RemoteSession
     @State private var keyboardText = ""
+    @State private var showsKeyboardEntry = false
     @State private var cursorPosition: CGPoint?
-    @State private var lastFingerPosition: CGPoint?
-    @State private var totalMovement: CGFloat = 0
+    @State private var joystickOrigin: CGPoint?
+    @State private var joystickVector = CGVector.zero
+    @State private var gestureDistance: CGFloat = 0
+    @State private var surfaceSize = CGSize.zero
+    @State private var lastPointerSend = Date.distantPast
     @FocusState private var keyboardFocused: Bool
+    private let pointerClock = Timer.publish(every: 1.0 / 60.0, on: .main, in: .common).autoconnect()
 
     var body: some View {
         ZStack {
@@ -21,20 +27,20 @@ struct SessionView: View {
                 }
             } else {
                 GeometryReader { geometry in
-                    let surface = fittedSize(in: geometry.size)
                     ZStack {
                         MJPEGStreamView(url: session.streamURL)
                         Image(systemName: "cursorarrow")
                             .font(.system(size: 25, weight: .semibold))
                             .foregroundStyle(.white)
                             .shadow(color: .black, radius: 2, x: 1, y: 1)
-                            .position(clamped(cursorPosition ?? CGPoint(x: surface.width / 2, y: surface.height / 2), to: surface))
+                            .position(clamped(cursorPosition ?? CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2), to: geometry.size))
                             .allowsHitTesting(false)
                     }
-                    .frame(width: surface.width, height: surface.height)
+                    .frame(width: geometry.size.width, height: geometry.size.height)
                     .contentShape(Rectangle())
-                    .gesture(trackpadGesture(in: surface))
-                    .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+                    .gesture(joystickGesture(in: geometry.size))
+                    .onAppear { updateSurface(geometry.size) }
+                    .onChange(of: geometry.size) { _, size in updateSurface(size) }
                 }
                 .ignoresSafeArea()
             }
@@ -46,53 +52,70 @@ struct SessionView: View {
                 }
                 .padding(12).background(.ultraThinMaterial, in: Capsule()).padding()
                 Spacer()
-                HStack(spacing: 20) {
-                    Button { keyboardFocused = true } label: { Label("Keyboard", systemImage: "keyboard") }
-                    Button { Task { await store.send(PointerEvent(kind: .scroll, x: 0.5, y: 0.5, deltaY: -160)) } } label: { Label("Scroll", systemImage: "arrow.up.and.down") }
+                if showsKeyboardEntry {
+                    HStack(spacing: 10) {
+                        TextField("Type to Windows", text: $keyboardText)
+                            .textFieldStyle(.roundedBorder)
+                            .focused($keyboardFocused)
+                            .submitLabel(.return)
+                            .onSubmit { Task { await store.send(text: "\n") } }
+                        Button { Task { await store.send(text: "\u{8}") } } label: {
+                            Image(systemName: "delete.left")
+                        }
+                        Button("Done") {
+                            keyboardFocused = false
+                            showsKeyboardEntry = false
+                        }
+                    }
+                    .padding(10)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+                    .padding(.horizontal)
+                } else {
+                    HStack(spacing: 20) {
+                        Button {
+                            showsKeyboardEntry = true
+                            Task { await Task.yield(); keyboardFocused = true }
+                        } label: { Label("Keyboard", systemImage: "keyboard") }
+                        Button { Task { await store.send(PointerEvent(kind: .scroll, x: 0.5, y: 0.5, deltaY: -160)) } } label: { Label("Scroll", systemImage: "arrow.up.and.down") }
+                    }
+                    .buttonStyle(.borderedProminent).tint(.mint).foregroundStyle(.black)
                 }
-                .buttonStyle(.borderedProminent).tint(.mint).foregroundStyle(.black).padding(.bottom)
+                Spacer().frame(height: 8)
             }
-            TextField("", text: $keyboardText)
-                .focused($keyboardFocused).frame(width: 1, height: 1).opacity(0.01)
-                .onChange(of: keyboardText) { _, value in
-                    guard !value.isEmpty else { return }
-                    Task { await store.send(text: value); keyboardText = "" }
-                }
         }
         .statusBarHidden()
+        .onChange(of: keyboardText) { _, value in
+            guard !value.isEmpty else { return }
+            Task { await store.send(text: value); keyboardText = "" }
+        }
+        .onReceive(pointerClock) { _ in advancePointer() }
     }
 
-    private func trackpadGesture(in size: CGSize) -> some Gesture {
+    private func joystickGesture(in size: CGSize) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { value in
-                guard let previous = lastFingerPosition else {
-                    lastFingerPosition = value.location
-                    totalMovement = 0
+                guard let origin = joystickOrigin else {
+                    joystickOrigin = value.location
+                    gestureDistance = 0
                     if cursorPosition == nil {
                         cursorPosition = CGPoint(x: size.width / 2, y: size.height / 2)
                     }
                     return
                 }
-
-                let deltaX = value.location.x - previous.x
-                let deltaY = value.location.y - previous.y
-                totalMovement += hypot(deltaX, deltaY)
-                lastFingerPosition = value.location
-
-                let current = clamped(cursorPosition ?? CGPoint(x: size.width / 2, y: size.height / 2), to: size)
-                let speed = pointerSpeed(for: hypot(deltaX, deltaY))
-                let next = clamped(
-                    CGPoint(x: current.x + deltaX * speed, y: current.y + deltaY * speed),
-                    to: size
-                )
-                cursorPosition = next
-                Task { await store.send(event(.move, at: next, in: size)) }
+                let dx = value.location.x - origin.x
+                let dy = value.location.y - origin.y
+                let distance = hypot(dx, dy)
+                gestureDistance = max(gestureDistance, distance)
+                let radius: CGFloat = 70
+                let scale = distance > radius ? radius / distance : 1
+                joystickVector = CGVector(dx: dx * scale / radius, dy: dy * scale / radius)
             }
             .onEnded { _ in
                 let point = cursorPosition ?? CGPoint(x: size.width / 2, y: size.height / 2)
-                let shouldClick = totalMovement < 10
-                lastFingerPosition = nil
-                totalMovement = 0
+                let shouldClick = gestureDistance < 8
+                joystickOrigin = nil
+                joystickVector = .zero
+                gestureDistance = 0
                 if shouldClick {
                     Task {
                         await store.send(event(.down, at: point, in: size))
@@ -100,6 +123,24 @@ struct SessionView: View {
                     }
                 }
             }
+    }
+
+    private func advancePointer() {
+        guard surfaceSize.width > 0, surfaceSize.height > 0,
+              abs(joystickVector.dx) > 0.01 || abs(joystickVector.dy) > 0.01 else { return }
+        let current = clamped(cursorPosition ?? CGPoint(x: surfaceSize.width / 2, y: surfaceSize.height / 2), to: surfaceSize)
+        let maximumSpeed: CGFloat = 20
+        let next = clamped(CGPoint(
+            x: current.x + joystickVector.dx * maximumSpeed,
+            y: current.y + joystickVector.dy * maximumSpeed
+        ), to: surfaceSize)
+        cursorPosition = next
+
+        let now = Date()
+        if now.timeIntervalSince(lastPointerSend) >= 1.0 / 30.0 {
+            lastPointerSend = now
+            Task { await store.send(event(.move, at: next, in: surfaceSize)) }
+        }
     }
 
     private func event(_ kind: PointerEventKind, at point: CGPoint, in size: CGSize) -> PointerEvent {
@@ -110,19 +151,10 @@ struct SessionView: View {
         CGPoint(x: min(max(point.x, 0), size.width), y: min(max(point.y, 0), size.height))
     }
 
-    private func pointerSpeed(for fingerDelta: CGFloat) -> CGFloat {
-        switch fingerDelta {
-        case ..<2: 0.9
-        case ..<8: 1.35
-        default: 1.8
-        }
-    }
-
-    private func fittedSize(in container: CGSize) -> CGSize {
-        let width = CGFloat(session.width ?? 16)
-        let height = CGFloat(session.height ?? 9)
-        let scale = min(container.width / width, container.height / height)
-        return CGSize(width: width * scale, height: height * scale)
+    private func updateSurface(_ size: CGSize) {
+        surfaceSize = size
+        cursorPosition = clamped(cursorPosition ?? CGPoint(x: size.width / 2, y: size.height / 2), to: size)
+        Task { await store.resizeSession(to: size) }
     }
 }
 

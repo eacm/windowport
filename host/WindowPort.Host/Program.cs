@@ -1,7 +1,9 @@
 using WindowPort.Host.Contracts;
 using WindowPort.Host.Services;
 using System.Net;
+using System.Runtime.InteropServices;
 
+if (OperatingSystem.IsWindows()) SetProcessDPIAware();
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<AppCatalog>();
 builder.Services.AddSingleton<SessionManager>();
@@ -67,6 +69,13 @@ app.MapPost("/api/sessions/{id:guid}/text", (Guid id, TextEvent input, SessionMa
     return Results.NoContent();
 });
 
+app.MapPost("/api/sessions/{id:guid}/resize", (Guid id, ResizeEvent input, SessionManager sessions) =>
+{
+    if (!sessions.TryGet(id, out var session)) return Results.NotFound();
+    sessions.Resize(session, input.Width, input.Height);
+    return Results.NoContent();
+});
+
 app.Run();
 
 static bool IsPrivate(IPAddress address)
@@ -80,4 +89,7 @@ static bool IsPrivate(IPAddress address)
         || (bytes[0] == 192 && bytes[1] == 168)
         || (bytes[0] == 100 && bytes[1] is >= 64 and <= 127);
 }
+
+[DllImport("user32.dll")]
+static extern bool SetProcessDPIAware();
 

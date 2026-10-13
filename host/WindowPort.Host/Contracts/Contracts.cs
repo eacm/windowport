@@ -4,4 +4,5 @@ public sealed record PublishedApplication(string Id, string Name, string Executa
 public sealed record RemoteSession(Guid Id, PublishedApplication Application, Uri StreamUrl, int Width, int Height);
 public sealed record PointerEvent(string Kind, double X, double Y, double? DeltaY);
 public sealed record TextEvent(string Text);
+public sealed record ResizeEvent(int Width, int Height);
 
