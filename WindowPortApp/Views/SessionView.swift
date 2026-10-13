@@ -152,10 +152,17 @@ struct SessionView: View {
         guard surfaceSize.width > 0, surfaceSize.height > 0,
               abs(joystickVector.dx) > 0.01 || abs(joystickVector.dy) > 0.01 else { return }
         let current = clamped(cursorPosition ?? CGPoint(x: surfaceSize.width / 2, y: surfaceSize.height / 2), to: surfaceSize)
-        let maximumSpeed: CGFloat = 24
+        let magnitude = min(hypot(joystickVector.dx, joystickVector.dy), 1)
+        let deadZone: CGFloat = 0.08
+        guard magnitude > deadZone else { return }
+        let normalizedMagnitude = (magnitude - deadZone) / (1 - deadZone)
+        let easedMagnitude = pow(normalizedMagnitude, 1.6)
+        let speed: CGFloat = 1.2 + 7.8 * easedMagnitude
+        let directionX = joystickVector.dx / magnitude
+        let directionY = joystickVector.dy / magnitude
         let next = clamped(CGPoint(
-            x: current.x + joystickVector.dx * maximumSpeed,
-            y: current.y + joystickVector.dy * maximumSpeed
+            x: current.x + directionX * speed,
+            y: current.y + directionY * speed
         ), to: surfaceSize)
         cursorPosition = next
 
