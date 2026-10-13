@@ -14,6 +14,7 @@
 		4CE5463E5CFAF90B853A8239 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BFC80B5FC852A7AECF1108D /* Models.swift */; };
 		75B1B790EC02C10C36661C3E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21DAD280A4836A821D7F2BB6 /* Assets.xcassets */; };
 		92BCD1B678B999F42B336BB1 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9314BE73F83FCCCEADE5EABD /* RootView.swift */; };
+		C0F524A179C557A664D96450 /* RemoteTouchSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = D042B8A0F4D05503AB29DF34 /* RemoteTouchSurface.swift */; };
 		C583D0DDCB0E38B538B804FE /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77B7A507A2360E30D2A28BB /* AppStore.swift */; };
 		D56E1BEE47F2BD786DE8C049 /* HostsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD68D6FE98EEDC25C371C05E /* HostsView.swift */; };
 		DA5E2CA4A4322EE714A0B79E /* WindowPortClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B8E4363395107900AA3B4E5 /* WindowPortClient.swift */; };
@@ -45,6 +46,7 @@
 		B77B7A507A2360E30D2A28BB /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
 		BC644DF80105420504DD4EA2 /* WindowPortTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = WindowPortTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD68D6FE98EEDC25C371C05E /* HostsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostsView.swift; sourceTree = "<group>"; };
+		D042B8A0F4D05503AB29DF34 /* RemoteTouchSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteTouchSurface.swift; sourceTree = "<group>"; };
 		DA1CAD6A08C68BF6E11734CB /* WindowPortApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowPortApp.swift; sourceTree = "<group>"; };
 		FA219B14BF589622370F2C94 /* SessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -129,6 +131,7 @@
 				BD68D6FE98EEDC25C371C05E /* HostsView.swift */,
 				A31F20C18C8E5A9C7A3C98F7 /* MJPEGStreamView.swift */,
 				0C9015D0273542FD18BC2B43 /* RemoteKeyboardView.swift */,
+				D042B8A0F4D05503AB29DF34 /* RemoteTouchSurface.swift */,
 				9314BE73F83FCCCEADE5EABD /* RootView.swift */,
 				FA219B14BF589622370F2C94 /* SessionView.swift */,
 			);
@@ -238,6 +241,7 @@
 				029687AAFE7DE91EEBB80544 /* MJPEGStreamView.swift in Sources */,
 				4CE5463E5CFAF90B853A8239 /* Models.swift in Sources */,
 				FB71BA5E0DBF78F44DFBEC48 /* RemoteKeyboardView.swift in Sources */,
+				C0F524A179C557A664D96450 /* RemoteTouchSurface.swift in Sources */,
 				92BCD1B678B999F42B336BB1 /* RootView.swift in Sources */,
 				12C3C80C4DF889A3156FDBBE /* SessionView.swift in Sources */,
 				40DA9E531A90F8F87935DD53 /* WindowPortApp.swift in Sources */,

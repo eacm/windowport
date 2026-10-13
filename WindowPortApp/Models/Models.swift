@@ -47,7 +47,7 @@ struct RemoteSession: Identifiable, Codable, Hashable {
     }
 }
 
-enum PointerEventKind: String, Codable { case move, down, up, click, scroll }
+enum PointerEventKind: String, Codable { case move, down, up, click, rightClick, scroll }
 
 struct PointerEvent: Codable {
     let kind: PointerEventKind

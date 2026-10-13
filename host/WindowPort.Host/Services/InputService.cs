@@ -8,6 +8,7 @@ public sealed class InputService
     private const uint InputMouse = 0, InputKeyboard = 1;
     private const uint KeyUp = 0x0002, KeyUnicode = 0x0004, KeyExtended = 0x0001;
     private const uint MouseMove = 0x0001, MouseLeftDown = 0x0002, MouseLeftUp = 0x0004;
+    private const uint MouseRightDown = 0x0008, MouseRightUp = 0x0010;
     private const uint MouseWheel = 0x0800, MouseVirtualDesk = 0x4000, MouseAbsolute = 0x8000;
 
     private static readonly Dictionary<string, ushort> Keys = new(StringComparer.OrdinalIgnoreCase)
@@ -43,6 +44,11 @@ public sealed class InputService
         {
             inputs.Add(MouseInput(0, 0, 0, MouseLeftDown));
             inputs.Add(MouseInput(0, 0, 0, MouseLeftUp));
+        }
+        if (input.Kind == "rightClick")
+        {
+            inputs.Add(MouseInput(0, 0, 0, MouseRightDown));
+            inputs.Add(MouseInput(0, 0, 0, MouseRightUp));
         }
         if (input.Kind == "scroll") inputs.Add(MouseInput(0, 0, input.DeltaY ?? 0, MouseWheel));
         var sent = Send(inputs);
