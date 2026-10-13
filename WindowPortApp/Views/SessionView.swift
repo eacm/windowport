@@ -172,7 +172,13 @@ struct SessionView: View {
     }
 
     private func event(_ kind: PointerEventKind, at point: CGPoint, in size: CGSize) -> PointerEvent {
-        PointerEvent(kind: kind, x: point.x / size.width, y: point.y / size.height, deltaY: nil)
+        // PrintWindow's rendered content sits slightly below the window's screen
+        // input coordinates. Calibrate the remote hotspot so the visible arrow tip,
+        // rather than the body of the cursor, is the point that activates controls.
+        let hotspotCorrection: CGFloat = 12
+        let remotePoint = CGPoint(x: point.x, y: point.y - hotspotCorrection)
+        let bounded = clamped(remotePoint, to: size)
+        return PointerEvent(kind: kind, x: bounded.x / size.width, y: bounded.y / size.height, deltaY: nil)
     }
 
     private func clamped(_ point: CGPoint, to size: CGSize) -> CGPoint {
