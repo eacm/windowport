@@ -256,7 +256,7 @@ struct SessionView: View {
         // The streamed Windows input surface has a vertical display-to-input
         // offset in landscape. This value is calibrated from the visible tip to
         // the observed Windows activation point on the target device.
-        let verticalCorrection: CGFloat = size.width > size.height ? 68 : 22
+        let verticalCorrection: CGFloat = size.width > size.height ? 68 : 44
         let bounded = clamped(CGPoint(x: point.x, y: point.y - verticalCorrection), to: size)
         return PointerEvent(kind: kind, x: bounded.x / size.width, y: bounded.y / size.height, deltaY: nil)
     }
