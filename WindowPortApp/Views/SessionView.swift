@@ -128,11 +128,14 @@ struct SessionView: View {
     }
 
     private var closeButton: some View {
-        Button { store.activeSession = nil } label: {
-            Image(systemName: "xmark.circle.fill")
-                .font(.system(size: 34, weight: .semibold))
-                .foregroundStyle(.blue)
-        }
+        Image(systemName: "xmark.circle.fill")
+            .font(.system(size: 34, weight: .semibold))
+            .foregroundStyle(.blue)
+            .contentShape(Circle())
+            .onTapGesture { store.activeSession = nil }
+            .accessibilityLabel("Close session")
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAction { store.activeSession = nil }
     }
 
     private var bannerDragGesture: some Gesture {
