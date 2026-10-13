@@ -17,7 +17,7 @@ struct SessionView: View {
     @State private var bannerDragOrigin = CGSize.zero
     @State private var bannerCollapsed = false
     @State private var bannerCollapseTask: Task<Void, Never>?
-    @FocusState private var keyboardFocused: Bool
+    @State private var keyboardFocused = false
 
     var body: some View {
         ZStack {
@@ -79,7 +79,7 @@ struct SessionView: View {
                 Spacer().frame(height: 8)
             }
             RemoteKeyboardView(
-                isFocused: Binding(get: { keyboardFocused }, set: { keyboardFocused = $0 }),
+                isFocused: $keyboardFocused,
                 onText: { text in Task { await store.send(text: text) } },
                 onKey: { key in Task { await store.send(key: key) } }
             )
@@ -200,7 +200,6 @@ struct SessionView: View {
                 joystickTask = nil
                 gestureDistance = 0
                 if shouldClick {
-                    showKeyboard()
                     Task {
                         await store.send(event(.down, at: point, in: size))
                         await store.send(event(.up, at: point, in: size))
