@@ -56,3 +56,11 @@ struct PointerEvent: Codable {
     let deltaY: Double?
 }
 
+struct RemoteKeyEvent: Codable {
+    let key: String
+    var control = false
+    var alt = false
+    var shift = false
+    var command = false
+}
+

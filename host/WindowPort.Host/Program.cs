@@ -69,6 +69,13 @@ app.MapPost("/api/sessions/{id:guid}/text", (Guid id, TextEvent input, SessionMa
     return Results.NoContent();
 });
 
+app.MapPost("/api/sessions/{id:guid}/key", (Guid id, KeyEvent input, SessionManager sessions, InputService service) =>
+{
+    if (!sessions.TryGet(id, out var session)) return Results.NotFound();
+    service.Key(session, input);
+    return Results.NoContent();
+});
+
 app.MapPost("/api/sessions/{id:guid}/resize", (Guid id, ResizeEvent input, SessionManager sessions) =>
 {
     if (!sessions.TryGet(id, out var session)) return Results.NotFound();

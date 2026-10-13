@@ -3,7 +3,6 @@ import SwiftUI
 struct SessionView: View {
     @Environment(AppStore.self) private var store
     let session: RemoteSession
-    @State private var keyboardText = ""
     @State private var showsKeyboardEntry = false
     @State private var cursorPosition: CGPoint?
     @State private var joystickOrigin: CGPoint?
@@ -55,15 +54,11 @@ struct SessionView: View {
                 .padding(12).background(.ultraThinMaterial, in: Capsule()).padding()
                 Spacer()
                 if showsKeyboardEntry {
-                    HStack(spacing: 10) {
-                        TextField("Type to Windows", text: $keyboardText)
-                            .textFieldStyle(.roundedBorder)
-                            .focused($keyboardFocused)
-                            .submitLabel(.return)
-                            .onSubmit { Task { await store.send(text: "\n") } }
-                        Button { Task { await store.send(text: "\u{8}") } } label: {
-                            Image(systemName: "delete.left")
-                        }
+                    HStack(spacing: 12) {
+                        Button("Esc") { sendKey("escape") }
+                        Button("Tab") { sendKey("tab") }
+                        Button { sendKey("left") } label: { Image(systemName: "arrow.left") }
+                        Button { sendKey("right") } label: { Image(systemName: "arrow.right") }
                         Button("Done") {
                             keyboardFocused = false
                             showsKeyboardEntry = false
@@ -84,16 +79,23 @@ struct SessionView: View {
                 }
                 Spacer().frame(height: 8)
             }
+            RemoteKeyboardView(
+                isFocused: Binding(get: { keyboardFocused }, set: { keyboardFocused = $0 }),
+                onText: { text in Task { await store.send(text: text) } },
+                onKey: { key in Task { await store.send(key: key) } }
+            )
+            .frame(width: 1, height: 1)
+            .opacity(0.01)
         }
         .statusBarHidden()
-        .onChange(of: keyboardText) { _, value in
-            guard !value.isEmpty else { return }
-            Task { await store.send(text: value); keyboardText = "" }
-        }
         .onDisappear {
             joystickTask?.cancel()
             resizeTask?.cancel()
         }
+    }
+
+    private func sendKey(_ key: String) {
+        Task { await store.send(key: RemoteKeyEvent(key: key)) }
     }
 
     private func joystickGesture(in size: CGSize) -> some Gesture {

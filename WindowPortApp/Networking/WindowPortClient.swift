@@ -6,6 +6,7 @@ protocol WindowPortServing: Sendable {
     func launch(_ app: RemoteApplication, on host: WindowsHost) async throws -> RemoteSession
     func send(pointer: PointerEvent, sessionID: UUID, to host: WindowsHost) async throws
     func send(text: String, sessionID: UUID, to host: WindowsHost) async throws
+    func send(key: RemoteKeyEvent, sessionID: UUID, to host: WindowsHost) async throws
     func resize(sessionID: UUID, width: Int, height: Int, on host: WindowsHost) async throws
 }
 
@@ -44,6 +45,11 @@ struct WindowPortClient: WindowPortServing {
     func send(text: String, sessionID: UUID, to host: WindowsHost) async throws {
         guard !host.isDemo else { return }
         try await post(["text": text], path: "/api/sessions/\(sessionID)/text", host: host)
+    }
+
+    func send(key: RemoteKeyEvent, sessionID: UUID, to host: WindowsHost) async throws {
+        guard !host.isDemo else { return }
+        try await post(key, path: "/api/sessions/\(sessionID)/key", host: host)
     }
 
     func resize(sessionID: UUID, width: Int, height: Int, on host: WindowsHost) async throws {
