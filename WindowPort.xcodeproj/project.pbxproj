@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		029687AAFE7DE91EEBB80544 /* MJPEGStreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31F20C18C8E5A9C7A3C98F7 /* MJPEGStreamView.swift */; };
 		0A74CB1EAFCFAAA7F30BC934 /* WindowPortTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966F40654D12AB790F2BE2EC /* WindowPortTests.swift */; };
 		12C3C80C4DF889A3156FDBBE /* SessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA219B14BF589622370F2C94 /* SessionView.swift */; };
 		40DA9E531A90F8F87935DD53 /* WindowPortApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1CAD6A08C68BF6E11734CB /* WindowPortApp.swift */; };
@@ -37,6 +38,7 @@
 		7BFC80B5FC852A7AECF1108D /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		9314BE73F83FCCCEADE5EABD /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		966F40654D12AB790F2BE2EC /* WindowPortTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowPortTests.swift; sourceTree = "<group>"; };
+		A31F20C18C8E5A9C7A3C98F7 /* MJPEGStreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MJPEGStreamView.swift; sourceTree = "<group>"; };
 		B77B7A507A2360E30D2A28BB /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
 		BC644DF80105420504DD4EA2 /* WindowPortTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = WindowPortTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD68D6FE98EEDC25C371C05E /* HostsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostsView.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 			children = (
 				0A5DF75B19138DCA45329512 /* AppCatalogView.swift */,
 				BD68D6FE98EEDC25C371C05E /* HostsView.swift */,
+				A31F20C18C8E5A9C7A3C98F7 /* MJPEGStreamView.swift */,
 				9314BE73F83FCCCEADE5EABD /* RootView.swift */,
 				FA219B14BF589622370F2C94 /* SessionView.swift */,
 			);
@@ -227,6 +230,7 @@
 				DBC978C411643750A78CCA3D /* AppCatalogView.swift in Sources */,
 				C583D0DDCB0E38B538B804FE /* AppStore.swift in Sources */,
 				D56E1BEE47F2BD786DE8C049 /* HostsView.swift in Sources */,
+				029687AAFE7DE91EEBB80544 /* MJPEGStreamView.swift in Sources */,
 				4CE5463E5CFAF90B853A8239 /* Models.swift in Sources */,
 				92BCD1B678B999F42B336BB1 /* RootView.swift in Sources */,
 				12C3C80C4DF889A3156FDBBE /* SessionView.swift in Sources */,
@@ -319,6 +323,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = WindowPort;
+				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsArbitraryLoads = YES;
+				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsLocalNetworking = YES;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "WindowPort connects to your Windows computer to show the apps you choose.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -339,6 +345,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = WindowPort;
+				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsArbitraryLoads = YES;
+				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsLocalNetworking = YES;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "WindowPort connects to your Windows computer to show the apps you choose.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				LD_RUNPATH_SEARCH_PATHS = (

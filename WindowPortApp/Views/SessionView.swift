@@ -16,9 +16,7 @@ struct SessionView: View {
                     Text("Demo session\nConnect a Windows host for live video and input.")
                         .multilineTextAlignment(.center).foregroundStyle(.secondary)
                 }
-            } else {
-                AsyncImage(url: session.streamURL) { image in image.resizable().scaledToFit() } placeholder: { ProgressView("Connecting…") }
-            }
+            } else { MJPEGStreamView(url: session.streamURL).ignoresSafeArea() }
             Rectangle().fill(.clear).contentShape(Rectangle()).gesture(pointerGesture)
             VStack {
                 HStack {
